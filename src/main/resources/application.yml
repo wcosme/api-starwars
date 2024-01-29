@@ -1,0 +1,11 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: star-wars-api
+  data:
+    mongodb:
+      uri: mongodb://root:admin@localhost:27017/db-star-wars?retryWrites=true&w=majority
+      auto-index-creation: true
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
