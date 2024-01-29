@@ -13,4 +13,3 @@ spring:
 # API URL
 apistarwars:
   urlApi: https://swapi.dev/api/planets/
-  urlPlanet: http://localhost/planets/
