@@ -9,3 +9,8 @@ spring:
       auto-index-creation: true
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+
+# API URL
+apistarwars:
+  urlApi: https://swapi.dev/api/planets/
+  urlPlanet: http://localhost/planets/
