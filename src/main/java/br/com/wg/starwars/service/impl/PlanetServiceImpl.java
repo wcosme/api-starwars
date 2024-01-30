@@ -16,7 +16,7 @@ public class PlanetServiceImpl implements PlanetService {
     private final PlanetRepository planetRepository;
 
     @Override
-    public Mono<Planet> create(PlanetRequest planetRequest) {
+    public Mono<Planet> save(PlanetRequest planetRequest) {
         return null;
     }
 

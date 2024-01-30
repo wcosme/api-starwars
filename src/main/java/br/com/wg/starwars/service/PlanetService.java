@@ -6,7 +6,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface PlanetService {
-    Mono<Planet> create(PlanetRequest planetRequest);
+    Mono<Planet> save(PlanetRequest planetRequest);
     Mono<Planet> findById(String id);
     Flux<Planet> findByName(String name);
     Flux<Planet> findAll();
