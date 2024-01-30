@@ -26,6 +26,7 @@ public class PlanetControllerImpl implements PlanetController {
 
     @Override
     public ResponseEntity<Mono<PlanetResponse>> findById(String id) {
+        var planetResponse = service.findById(id);
         return null;
     }
 
