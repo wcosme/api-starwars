@@ -41,10 +41,13 @@ public class PlanetServiceImpl implements PlanetService {
     }
 
     @Override
-    public Mono<Void> delete(String id) {
-        return planetRepository.findById(id)
+    public Mono<Planet> delete(String id) {
+
+        return handleNotFound(planetRepository.findById(id), id);
+
+        /*return planetRepository.findById(id)
                 .flatMap(planetRepository::delete)
-                .then();
+                .then();*/
     }
 
     private <T> Mono<T> handleNotFound(Mono<T> mono, String id) {
