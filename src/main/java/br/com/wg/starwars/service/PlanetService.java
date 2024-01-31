@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 public interface PlanetService {
     Mono<Planet> save(PlanetRequest planetRequest);
     Mono<Planet> findById(String id);
-    Flux<Planet> findByName(String name);
+    Mono<Planet> findByName(String name);
     Flux<Planet> findAll();
     Mono<Void> delete(String id);
 }

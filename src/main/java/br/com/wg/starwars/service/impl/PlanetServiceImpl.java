@@ -1,5 +1,6 @@
 package br.com.wg.starwars.service.impl;
 
+import br.com.wg.starwars.mapper.PlanetMapper;
 import br.com.wg.starwars.model.document.Planet;
 import br.com.wg.starwars.model.request.PlanetRequest;
 import br.com.wg.starwars.repository.PlanetRepository;
@@ -14,20 +15,21 @@ import reactor.core.publisher.Mono;
 public class PlanetServiceImpl implements PlanetService {
 
     private final PlanetRepository planetRepository;
+    private final PlanetMapper planetMapper;
 
     @Override
     public Mono<Planet> save(PlanetRequest planetRequest) {
-        return null;
+        return planetRepository.save(planetMapper.requestToEntity(planetRequest));
     }
 
     @Override
     public Mono<Planet> findById(String id) {
-        return null;
+        return planetRepository.findById(id);
     }
 
     @Override
-    public Flux<Planet> findByName(String name) {
-        return planetRepository.findByNameContainingIgnoreCase(name);
+    public Mono<Planet> findByName(String name) {
+        return null;
     }
 
     @Override

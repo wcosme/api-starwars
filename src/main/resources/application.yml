@@ -5,7 +5,7 @@ spring:
     name: star-wars-api
   data:
     mongodb:
-      uri: mongodb://root:admin@localhost:27017/db-star-wars
+      uri: mongodb://localhost:27017/db-star-wars
       auto-index-creation: true
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
@@ -13,3 +13,6 @@ spring:
 # API URL
 apistarwars:
   urlApi: https://swapi.dev/api/planets/
+
+# mongodb://localhost:27017/
+# mongodb://root:admin@localhost:27017/db-star-wars

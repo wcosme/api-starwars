@@ -1,6 +1,7 @@
 package br.com.wg.starwars.controllers.impl;
 
 import br.com.wg.starwars.controllers.PlanetController;
+import br.com.wg.starwars.mapper.PlanetMapper;
 import br.com.wg.starwars.model.request.PlanetRequest;
 import br.com.wg.starwars.model.response.PlanetResponse;
 import br.com.wg.starwars.service.PlanetService;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 public class PlanetControllerImpl implements PlanetController {
 
     private final PlanetService service;
+    private final PlanetMapper mapper;
 
     @Override
     public ResponseEntity<Mono<Void>> save(final PlanetRequest request) {
@@ -26,8 +28,9 @@ public class PlanetControllerImpl implements PlanetController {
 
     @Override
     public ResponseEntity<Mono<PlanetResponse>> findById(String id) {
-        var planetResponse = service.findById(id);
-        return null;
+        return ResponseEntity.status(HttpStatus.OK).body(
+                service.findById(id).map(mapper::entityToResponse)
+        );
     }
 
     @Override
@@ -37,11 +40,15 @@ public class PlanetControllerImpl implements PlanetController {
 
     @Override
     public ResponseEntity<Flux<PlanetResponse>> findAll() {
-        return null;
+        return ResponseEntity.ok().body(
+                service.findAll().map(mapper::entityToResponse)
+        );
     }
 
     @Override
     public ResponseEntity<Mono<Void>> delete(String id) {
-        return null;
+        return ResponseEntity.ok().body(
+                service.delete(id).then()
+        );
     }
 }
