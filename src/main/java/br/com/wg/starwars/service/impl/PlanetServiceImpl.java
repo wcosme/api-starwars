@@ -5,10 +5,13 @@ import br.com.wg.starwars.model.document.Planet;
 import br.com.wg.starwars.model.request.PlanetRequest;
 import br.com.wg.starwars.repository.PlanetRepository;
 import br.com.wg.starwars.service.PlanetService;
+import br.com.wg.starwars.service.exception.ObjectNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static java.lang.String.format;
 
 @RequiredArgsConstructor
 @Service
@@ -24,12 +27,12 @@ public class PlanetServiceImpl implements PlanetService {
 
     @Override
     public Mono<Planet> findById(String id) {
-        return planetRepository.findById(id);
+        return handleNotFound(planetRepository.findById(id), id);
     }
 
     @Override
-    public Mono<Planet> findByName(String name) {
-        return null;
+    public Flux<Planet> findByName(String name) {
+        return planetRepository.findByNameContainingIgnoreCase(name);
     }
 
     @Override
@@ -42,5 +45,13 @@ public class PlanetServiceImpl implements PlanetService {
         return planetRepository.findById(id)
                 .flatMap(planetRepository::delete)
                 .then();
+    }
+
+    private <T> Mono<T> handleNotFound(Mono<T> mono, String id) {
+        return mono.switchIfEmpty(Mono.error(
+                new ObjectNotFoundException(
+                        format("Object not found. Id: %s, Type: %s", id, Planet.class.getSimpleName())
+                )
+        ));
     }
 }

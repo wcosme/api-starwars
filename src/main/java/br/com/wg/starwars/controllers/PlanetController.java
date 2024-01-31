@@ -10,12 +10,12 @@ import reactor.core.publisher.Mono;
 public interface PlanetController {
 
     @PostMapping
-    ResponseEntity<Mono<Void>> save(@RequestBody PlanetRequest request);
+    ResponseEntity<Mono<PlanetResponse>> save(@RequestBody PlanetRequest request);
 
     @GetMapping(value = "/{id}")
     ResponseEntity<Mono<PlanetResponse>> findById(@PathVariable String id);
 
-    @GetMapping(value = "/{name}")
+    @GetMapping(value = "/planetName/{name}")
     ResponseEntity<Mono<PlanetResponse>> findByName(@PathVariable String name);
 
     @GetMapping

@@ -22,13 +22,15 @@ public class PlanetControllerImpl implements PlanetController {
     private final PlanetMapper mapper;
 
     @Override
-    public ResponseEntity<Mono<Void>> save(final PlanetRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.save(request).then());
+    public ResponseEntity<Mono<PlanetResponse>> save(final PlanetRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                service.save(request).map(mapper::entityToResponse)
+        );
     }
 
     @Override
     public ResponseEntity<Mono<PlanetResponse>> findById(String id) {
-        return ResponseEntity.status(HttpStatus.OK).body(
+        return ResponseEntity.ok().body(
                 service.findById(id).map(mapper::entityToResponse)
         );
     }
@@ -47,7 +49,7 @@ public class PlanetControllerImpl implements PlanetController {
 
     @Override
     public ResponseEntity<Mono<Void>> delete(String id) {
-        return ResponseEntity.ok().body(
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(
                 service.delete(id).then()
         );
     }
