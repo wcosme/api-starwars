@@ -10,5 +10,5 @@ public interface PlanetService {
     Mono<Planet> findById(String id);
     Flux<Planet> findByName(String name);
     Flux<Planet> findAll();
-    Mono<Planet> delete(String id);
+    Mono<Void> delete(String id);
 }
