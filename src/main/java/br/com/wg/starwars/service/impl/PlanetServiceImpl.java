@@ -1,5 +1,6 @@
 package br.com.wg.starwars.service.impl;
 
+import br.com.wg.starwars.client.SwapiClient;
 import br.com.wg.starwars.mapper.PlanetMapper;
 import br.com.wg.starwars.model.document.Planet;
 import br.com.wg.starwars.model.request.PlanetRequest;
@@ -19,15 +20,31 @@ public class PlanetServiceImpl implements PlanetService {
 
     private final PlanetRepository planetRepository;
     private final PlanetMapper planetMapper;
+    private final SwapiClient swapiClient;
 
     @Override
     public Mono<Planet> save(PlanetRequest planetRequest) {
+
         return planetRepository.save(planetMapper.requestToEntity(planetRequest));
+
+        /*return swapiClient.findByName(planetRequest.getName())
+                .flatMapMany(result -> Flux.fromIterable(result.getResults()))
+                .switchIfEmpty(Mono.error(new ObjectNotFoundException("Planet name not found!")))
+                .flatMap(resultFilms -> Flux.fromIterable(resultFilms.getFilms()))
+                .count()
+                .doOnNext(planetRequest::setNumberAppearances)
+                .flatMap(ignore -> planetRepository.save(planetMapper.requestToEntity(planetRequest)));*/
+
     }
 
     @Override
     public Mono<Planet> findById(String id) {
-        return handleNotFound(planetRepository.findById(id), id);
+
+        return planetRepository.findById(id)
+                .switchIfEmpty(swapiClient.findById(id)
+                .switchIfEmpty(handleNotFound(Mono.empty(), id)))
+                .flatMap(planetRepository::save);
+
     }
 
     @Override

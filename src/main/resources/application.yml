@@ -12,7 +12,7 @@ spring:
 
 # API URL
 apistarwars:
-  urlApi: https://swapi.dev/api/planets/
+  urlApi: https://swapi.dev/api/
 
 # mongodb://localhost:27017/
 # mongodb://root:admin@localhost:27017/db-star-wars

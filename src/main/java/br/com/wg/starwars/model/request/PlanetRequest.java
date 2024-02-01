@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record PlanetRequest(
+        String id,
         String name,
         String climate,
-        String terrain
+        String terrain,
+        Long numberAppearances,
+        String createDate,
+        String updated
 ) { }

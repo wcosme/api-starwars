@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 
 import static java.time.LocalDateTime.now;
@@ -27,5 +28,21 @@ public class ControllerExceptionsHandler {
                         .build())
         );
     }
+
+    @ExceptionHandler(WebClientResponseException.class)
+    ResponseEntity<Mono<StandardError>> webClientResponseException(
+            WebClientResponseException ex, ServerHttpRequest request) {
+
+        return ResponseEntity.status(NOT_FOUND).body(
+                Mono.just(StandardError.builder()
+                        .timestamp(now())
+                        .status(NOT_FOUND.value())
+                        .error(NOT_FOUND.getReasonPhrase())
+                        .message(ex.getMessage())
+                        .path(request.getURI().getPath().toString())
+                        .build())
+        );
+    }
+
 }
 

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
@@ -24,5 +25,10 @@ public class Planet implements Serializable {
 	private String climate;
 	private String terrain;
 	private Long numberAppearances;
+
+	@Version
+	private Long version;
+	private String createdAt;
+	private String lastModified;
 
 }
