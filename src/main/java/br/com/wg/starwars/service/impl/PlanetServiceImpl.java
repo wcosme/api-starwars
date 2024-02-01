@@ -24,22 +24,11 @@ public class PlanetServiceImpl implements PlanetService {
 
     @Override
     public Mono<Planet> save(PlanetRequest planetRequest) {
-
         return planetRepository.save(planetMapper.requestToEntity(planetRequest));
-
-        /*return swapiClient.findByName(planetRequest.getName())
-                .flatMapMany(result -> Flux.fromIterable(result.getResults()))
-                .switchIfEmpty(Mono.error(new ObjectNotFoundException("Planet name not found!")))
-                .flatMap(resultFilms -> Flux.fromIterable(resultFilms.getFilms()))
-                .count()
-                .doOnNext(planetRequest::setNumberAppearances)
-                .flatMap(ignore -> planetRepository.save(planetMapper.requestToEntity(planetRequest)));*/
-
     }
 
     @Override
     public Mono<Planet> findById(String id) {
-
         return planetRepository.findById(id)
                 .switchIfEmpty(swapiClient.findById(id)
                 .switchIfEmpty(handleNotFound(Mono.empty(), id)))
@@ -49,7 +38,9 @@ public class PlanetServiceImpl implements PlanetService {
 
     @Override
     public Flux<Planet> findByName(String name) {
-        return planetRepository.findByNameContainingIgnoreCase(name);
+        return planetRepository.findByNameContainingIgnoreCase(name)
+                .switchIfEmpty(handleNotFound(Mono.empty(), name));
+
     }
 
     @Override

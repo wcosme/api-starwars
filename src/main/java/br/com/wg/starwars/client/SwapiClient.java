@@ -5,6 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -25,6 +28,7 @@ public class SwapiClient {
 				.uri("planets/" + id)
 				.accept(APPLICATION_JSON)
 				.retrieve()
-				.bodyToMono(Planet.class);
+				.bodyToMono(Planet.class)
+				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
 	}
 }

@@ -36,8 +36,10 @@ public class PlanetControllerImpl implements PlanetController {
     }
 
     @Override
-    public ResponseEntity<Mono<PlanetResponse>> findByName(String name) {
-        return null;
+    public ResponseEntity<Flux<PlanetResponse>> findByName(String name) {
+        return ResponseEntity.ok().body(
+                service.findByName(name).map(mapper::entityToResponse)
+        );
     }
 
     @Override

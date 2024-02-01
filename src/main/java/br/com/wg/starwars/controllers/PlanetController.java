@@ -16,7 +16,7 @@ public interface PlanetController {
     ResponseEntity<Mono<PlanetResponse>> findById(@PathVariable String id);
 
     @GetMapping(value = "/planetName/{name}")
-    ResponseEntity<Mono<PlanetResponse>> findByName(@PathVariable String name);
+    ResponseEntity<Flux<PlanetResponse>> findByName(@PathVariable String name);
 
     @GetMapping
     ResponseEntity<Flux<PlanetResponse>> findAll();

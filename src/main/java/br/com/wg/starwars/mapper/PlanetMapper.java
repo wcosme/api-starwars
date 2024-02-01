@@ -20,4 +20,6 @@ public interface PlanetMapper {
     Planet requestToEntity(final PlanetRequest request);
 
     PlanetResponse entityToResponse(final Planet entity);
+
+    Planet responseToEntity(final Planet entity);
 }
