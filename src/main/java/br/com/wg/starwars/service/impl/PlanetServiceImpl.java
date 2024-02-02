@@ -68,10 +68,10 @@ public class PlanetServiceImpl implements PlanetService {
         ));
     }
 
-    private Flux<Planet> getPlanet(PlanetResponse response) {
-        var planetFlux = Flux.just(response);
+    private Flux<Planet> getPlanet(PlanetResponse dto) {
+        var planetFlux = Flux.just(dto);
 
-        var filmsFlux = Flux.fromIterable(response.getFilms())
+        var filmsFlux = Flux.fromIterable(dto.getFilms())
                 .flatMap(url -> swapiClient.findByUrl(url, FilmsDTO.class))
                 .map(filmsDTO -> new Film(UUID.randomUUID().toString(), filmsDTO.getTitle()))
                 .collectList();
