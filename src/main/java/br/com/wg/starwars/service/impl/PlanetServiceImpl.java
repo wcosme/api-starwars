@@ -4,7 +4,7 @@ import br.com.wg.starwars.client.SwapiClient;
 import br.com.wg.starwars.mapper.PlanetMapper;
 import br.com.wg.starwars.model.document.Film;
 import br.com.wg.starwars.model.document.Planet;
-import br.com.wg.starwars.model.dto.FilmsDTO;
+import br.com.wg.starwars.model.dto.FilmDTO;
 import br.com.wg.starwars.model.request.PlanetRequest;
 import br.com.wg.starwars.model.response.PlanetResponse;
 import br.com.wg.starwars.repository.PlanetRepository;
@@ -72,7 +72,7 @@ public class PlanetServiceImpl implements PlanetService {
         var planetFlux = Flux.just(dto);
 
         var filmsFlux = Flux.fromIterable(dto.getFilms())
-                .flatMap(url -> swapiClient.findByUrl(url, FilmsDTO.class))
+                .flatMap(url -> swapiClient.findByUrl(url, FilmDTO.class))
                 .map(filmsDTO -> new Film(UUID.randomUUID().toString(), filmsDTO.getTitle()))
                 .collectList();
 
