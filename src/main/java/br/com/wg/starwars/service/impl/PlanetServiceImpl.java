@@ -31,9 +31,8 @@ public class PlanetServiceImpl implements PlanetService {
     public Mono<Planet> findById(String id) {
         return planetRepository.findById(id)
                 .switchIfEmpty(swapiClient.findById(id)
-                .switchIfEmpty(handleNotFound(Mono.empty(), id)))
-                .flatMap(planetRepository::save);
-
+                .flatMap(planet -> planetRepository.save(planetMapper.responseToEntity(planet))
+                .switchIfEmpty(handleNotFound(Mono.empty(), id))));
     }
 
     @Override
