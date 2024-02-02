@@ -31,4 +31,17 @@ public class SwapiClient {
 				.bodyToMono(PlanetResponse.class)
 				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
 	}
+
+	public <T> Mono<T> findByUrl(String url, Class<T> tipo) {
+		log.info("Buscando o planeta de id: [{}]", url);
+		return swapiClient
+				.get()
+				.uri(url)
+				.accept(APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(tipo)
+				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
+	}
+
+
 }

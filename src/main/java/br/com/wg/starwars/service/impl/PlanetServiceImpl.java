@@ -2,8 +2,11 @@ package br.com.wg.starwars.service.impl;
 
 import br.com.wg.starwars.client.SwapiClient;
 import br.com.wg.starwars.mapper.PlanetMapper;
+import br.com.wg.starwars.model.document.Film;
 import br.com.wg.starwars.model.document.Planet;
+import br.com.wg.starwars.model.dto.FilmsDTO;
 import br.com.wg.starwars.model.request.PlanetRequest;
+import br.com.wg.starwars.model.response.PlanetResponse;
 import br.com.wg.starwars.repository.PlanetRepository;
 import br.com.wg.starwars.service.PlanetService;
 import br.com.wg.starwars.service.exception.ObjectNotFoundException;
@@ -11,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 import static java.lang.String.format;
 
@@ -29,10 +34,11 @@ public class PlanetServiceImpl implements PlanetService {
 
     @Override
     public Mono<Planet> findById(String id) {
+
         return planetRepository.findById(id)
                 .switchIfEmpty(swapiClient.findById(id)
-                .flatMap(planet -> planetRepository.save(planetMapper.responseToEntity(planet))
-                .switchIfEmpty(handleNotFound(Mono.empty(), id))));
+                        .flatMap(planet -> planetRepository.save(planetMapper.responseToEntity(planet))
+                                .switchIfEmpty(handleNotFound(Mono.empty(), id))));
     }
 
     @Override
@@ -60,5 +66,20 @@ public class PlanetServiceImpl implements PlanetService {
                         format("Object not found. Id: %s, Type: %s", id, Planet.class.getSimpleName())
                 )
         ));
+    }
+
+    private Flux<Planet> getPlanet(PlanetResponse response) {
+        var planetFlux = Flux.just(response);
+
+        var filmsFlux = Flux.fromIterable(response.getFilms())
+                .flatMap(url -> swapiClient.findByUrl(url, FilmsDTO.class))
+                .map(filmsDTO -> new Film(UUID.randomUUID().toString(), filmsDTO.getTitle()))
+                .collectList();
+
+        var result = planetFlux.zipWith(filmsFlux, (planet, films) -> {
+            return new Planet(UUID.randomUUID().toString(), planet.getName(), planet.getClimate(), planet.getTerrain());
+        });
+
+        return result;
     }
 }

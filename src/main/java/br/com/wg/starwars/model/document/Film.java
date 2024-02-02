@@ -13,15 +13,12 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection="star_wars")
-public class Planet implements Serializable {
+@Document(collection="film")
+public class Film implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	@Id
 	private String id;
-	private String name;
-	private String climate;
-	private String terrain;
-
+	private String title;
 }
