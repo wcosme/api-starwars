@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection="star_wars")
+@Document(collection="planets")
 public class Planet implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

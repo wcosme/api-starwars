@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8080
 spring:
   application:
     name: star-wars-api
@@ -9,10 +9,7 @@ spring:
       auto-index-creation: true
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
-
+    uuid-representation: standard
 # API URL
 apistarwars:
   urlApi: https://swapi.dev/api/
-
-# mongodb://localhost:27017/
-# mongodb://root:admin@localhost:27017/db-star-wars

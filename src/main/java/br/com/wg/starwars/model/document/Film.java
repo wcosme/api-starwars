@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection="film")
+@Document(collection="films")
 public class Film implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
