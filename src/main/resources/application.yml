@@ -10,6 +10,16 @@ spring:
   autoconfigure:
     exclude: org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
     uuid-representation: standard
+
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          mongodb:
+            core:
+              ReactiveMongoTemplate: DEBUG
+
 # API URL
 apistarwars:
   urlApi: https://swapi.dev/api/
