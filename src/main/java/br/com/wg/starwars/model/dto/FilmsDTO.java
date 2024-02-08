@@ -17,6 +17,7 @@ import java.util.UUID;
 public class FilmsDTO implements Serializable{
 
 	private UUID id;
+	private String url;
 	private String title;
 	private String opening_crawl;
 }
