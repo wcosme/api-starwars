@@ -4,10 +4,11 @@ import br.com.wg.starwars.client.SwapiClient;
 import br.com.wg.starwars.mapper.PlanetMapper;
 import br.com.wg.starwars.model.document.Film;
 import br.com.wg.starwars.model.document.Planet;
-import br.com.wg.starwars.model.dto.FilmDTO;
+import br.com.wg.starwars.model.dto.FilmsDTO;
 import br.com.wg.starwars.model.request.PlanetRequest;
 import br.com.wg.starwars.model.response.PlanetResponse;
 import br.com.wg.starwars.repository.PlanetRepository;
+import br.com.wg.starwars.repository.WebClientRepository;
 import br.com.wg.starwars.service.PlanetService;
 import br.com.wg.starwars.service.exception.ObjectNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class PlanetServiceImpl implements PlanetService {
     private final PlanetRepository planetRepository;
     private final PlanetMapper planetMapper;
     private final SwapiClient swapiClient;
+    private final WebClientRepository webClientRepository;
 
     @Override
     public Mono<Planet> save(PlanetRequest planetRequest) {
@@ -73,12 +75,17 @@ public class PlanetServiceImpl implements PlanetService {
         var planetFlux = Flux.just(dto);
 
         var filmsFlux = Flux.fromIterable(dto.getFilms())
-                .flatMap(url -> swapiClient.findByUrl(url, FilmDTO.class))
-                .map(filmsDTO -> new Film(UUID.randomUUID().toString(), filmsDTO.getTitle()))
+                .flatMap(url -> swapiClient.findByUrl(url, FilmsDTO.class))
+                .map(filmsDTO -> new Film(
+                        filmsDTO.getUrl(),
+                        filmsDTO.getTitle(),
+                        filmsDTO.getEpisode_id(),
+                        filmsDTO.getOpening_crawl(),
+                        filmsDTO.getRelease_date()))
                 .collectList();
 
         var result = planetFlux.zipWith(filmsFlux, (planet, films) -> {
-            return new Planet(UUID.randomUUID().toString(), planet.getName(), planet.getClimate(), planet.getTerrain());
+            return new Planet(UUID.randomUUID().toString(), planet.getName(), planet.getClimate(), planet.getTerrain(), planet.getFilms());
         });
 
         return result;

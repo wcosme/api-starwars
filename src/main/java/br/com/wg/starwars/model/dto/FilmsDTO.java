@@ -1,26 +1,24 @@
-package br.com.wg.starwars.model.document;
+package br.com.wg.starwars.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection="films")
-public class Film implements Serializable {
-	
-	private static final long serialVersionUID = 1L;
-	
-	@Id
-	private String id;
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class FilmsDTO implements Serializable{
+
+	private UUID id;
+	private String url;
 	private String title;
 	private Integer episode_id;
 	private String opening_crawl;

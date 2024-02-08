@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Data
 @Builder
@@ -23,5 +24,6 @@ public class Planet implements Serializable {
 	private String name;
 	private String climate;
 	private String terrain;
+	private List<String> films;
 
 }
