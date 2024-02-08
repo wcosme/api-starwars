@@ -1,7 +1,7 @@
 package br.com.wg.starwars.controllers;
 
 import br.com.wg.starwars.model.request.PlanetRequest;
-import br.com.wg.starwars.model.response.PlanetResponse;
+import br.com.wg.starwars.model.dto.PlanetDTO;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,16 +11,16 @@ import reactor.core.publisher.Mono;
 public interface PlanetController {
 
     @PostMapping
-    ResponseEntity<Mono<PlanetResponse>> save(@Valid @RequestBody PlanetRequest request);
+    ResponseEntity<Mono<PlanetDTO>> save(@Valid @RequestBody PlanetRequest request);
 
     @GetMapping(value = "/id/{id}")
-    ResponseEntity<Mono<PlanetResponse>> findById(@PathVariable String id);
+    ResponseEntity<Mono<PlanetDTO>> findById(@PathVariable String id);
 
     @GetMapping(value = "/planetName/{name}")
-    ResponseEntity<Flux<PlanetResponse>> findByName(@PathVariable("name") String name);
+    ResponseEntity<Flux<PlanetDTO>> findByName(@PathVariable("name") String name);
 
     @GetMapping
-    ResponseEntity<Flux<PlanetResponse>> findAll();
+    ResponseEntity<Flux<PlanetDTO>> findAll();
 
     @DeleteMapping(value = "/id/{id}")
     ResponseEntity<Mono<Void>> delete(@PathVariable String id);

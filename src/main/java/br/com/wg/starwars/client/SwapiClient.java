@@ -1,6 +1,6 @@
 package br.com.wg.starwars.client;
 
-import br.com.wg.starwars.model.response.PlanetResponse;
+import br.com.wg.starwars.model.dto.PlanetDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,25 +21,25 @@ public class SwapiClient {
 		this.swapiClient = builder.baseUrl("https://swapi.dev/api/").build();
     }
 
-	public Mono<PlanetResponse> findById(String id) {
+	public Mono<PlanetDTO> findById(String id) {
 		log.info("Buscando o planeta de id: [{}]", id);
 		return swapiClient
 				.get()
 				.uri("planets/" + id)
 				.accept(APPLICATION_JSON)
 				.retrieve()
-				.bodyToMono(PlanetResponse.class)
+				.bodyToMono(PlanetDTO.class)
 				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
 	}
 
-	public Mono<PlanetResponse> findByName(String name) {
+	public Mono<PlanetDTO> findByName(String name) {
 		log.info("Buscando o planeta de name: [{}]", name);
 		return swapiClient
 				.get()
 				.uri("planets/" + name)
 				.accept(APPLICATION_JSON)
 				.retrieve()
-				.bodyToMono(PlanetResponse.class)
+				.bodyToMono(PlanetDTO.class)
 				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
 	}
 

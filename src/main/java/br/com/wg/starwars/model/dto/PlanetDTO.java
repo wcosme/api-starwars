@@ -1,4 +1,4 @@
-package br.com.wg.starwars.model.response;
+package br.com.wg.starwars.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PlanetResponse {
+public class PlanetDTO {
     private String id;
 	private String name;
     private String climate;

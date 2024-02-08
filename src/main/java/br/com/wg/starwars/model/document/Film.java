@@ -8,7 +8,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 
 @Data
 @Builder
@@ -22,7 +21,5 @@ public class Film implements Serializable {
 	@Id
 	private String id;
 	private String title;
-	private Integer episode_id;
 	private String opening_crawl;
-	private LocalDate release_date;
 }

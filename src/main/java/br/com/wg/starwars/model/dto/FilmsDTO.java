@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -18,9 +17,6 @@ import java.util.UUID;
 public class FilmsDTO implements Serializable{
 
 	private UUID id;
-	private String url;
 	private String title;
-	private Integer episode_id;
 	private String opening_crawl;
-	private LocalDate release_date;
 }

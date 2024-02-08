@@ -5,8 +5,8 @@ import br.com.wg.starwars.mapper.PlanetMapper;
 import br.com.wg.starwars.model.document.Film;
 import br.com.wg.starwars.model.document.Planet;
 import br.com.wg.starwars.model.dto.FilmsDTO;
+import br.com.wg.starwars.model.dto.PlanetDTO;
 import br.com.wg.starwars.model.request.PlanetRequest;
-import br.com.wg.starwars.model.response.PlanetResponse;
 import br.com.wg.starwars.repository.PlanetRepository;
 import br.com.wg.starwars.service.PlanetService;
 import br.com.wg.starwars.service.exception.ObjectNotFoundException;
@@ -68,7 +68,7 @@ public class PlanetServiceImpl implements PlanetService {
         ));
     }
 
-    private Flux<Planet> getPlanet(PlanetResponse dto) {
+    private Flux<Planet> getPlanet(PlanetDTO dto) {
         var planetFlux = Flux.just(dto);
 
         var filmsFlux = Flux.fromIterable(dto.getFilms())
@@ -76,9 +76,7 @@ public class PlanetServiceImpl implements PlanetService {
                 .map(filmsDTO -> new Film(
                         filmsDTO.getUrl(),
                         filmsDTO.getTitle(),
-                        filmsDTO.getEpisode_id(),
-                        filmsDTO.getOpening_crawl(),
-                        filmsDTO.getRelease_date()))
+                        filmsDTO.getOpening_crawl()))
                 .collectList();
 
         var result = planetFlux.zipWith(filmsFlux, (planet, films) -> {
