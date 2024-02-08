@@ -8,7 +8,6 @@ import br.com.wg.starwars.model.dto.FilmsDTO;
 import br.com.wg.starwars.model.request.PlanetRequest;
 import br.com.wg.starwars.model.response.PlanetResponse;
 import br.com.wg.starwars.repository.PlanetRepository;
-import br.com.wg.starwars.repository.WebClientRepository;
 import br.com.wg.starwars.service.PlanetService;
 import br.com.wg.starwars.service.exception.ObjectNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,6 @@ public class PlanetServiceImpl implements PlanetService {
     private final PlanetRepository planetRepository;
     private final PlanetMapper planetMapper;
     private final SwapiClient swapiClient;
-    private final WebClientRepository webClientRepository;
 
     @Override
     public Mono<Planet> save(PlanetRequest planetRequest) {
@@ -39,7 +37,7 @@ public class PlanetServiceImpl implements PlanetService {
 
         return planetRepository.findById(id)
                 .switchIfEmpty(swapiClient.findById(id)
-                        .flatMap(planet -> planetRepository.save(planetMapper.responseToEntity(planet))
+                        .flatMap(planetResponse -> planetRepository.save(planetMapper.responseToEntity(planetResponse))
                                 .switchIfEmpty(handleNotFound(Mono.empty(), id))));
     }
 
@@ -52,7 +50,6 @@ public class PlanetServiceImpl implements PlanetService {
 
     @Override
     public Flux<Planet> findAll() {
-
         return planetRepository.findAll();
     }
 
@@ -85,7 +82,7 @@ public class PlanetServiceImpl implements PlanetService {
                 .collectList();
 
         var result = planetFlux.zipWith(filmsFlux, (planet, films) -> {
-            return new Planet(UUID.randomUUID().toString(), planet.getName(), planet.getClimate(), planet.getTerrain(), planet.getFilms());
+            return new Planet(UUID.randomUUID().toString(), planet.getName(), planet.getClimate(), planet.getTerrain(), planet.getFilmAppearances(), planet.getFilms());
         });
 
         return result;

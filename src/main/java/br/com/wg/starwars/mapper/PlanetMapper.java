@@ -19,6 +19,7 @@ public interface PlanetMapper {
     @Mapping(target = "id", ignore = true)
     Planet requestToEntity(final PlanetRequest request);
 
+    @Mapping(target = "id", ignore = true)
     Planet responseToEntity(final PlanetResponse planet);
 
     PlanetResponse entityToResponse(final Planet entity);
