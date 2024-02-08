@@ -2,8 +2,8 @@ package br.com.wg.starwars.controllers.impl;
 
 import br.com.wg.starwars.controllers.PlanetController;
 import br.com.wg.starwars.mapper.PlanetMapper;
+import br.com.wg.starwars.model.dto.PlanetDTO;
 import br.com.wg.starwars.model.request.PlanetRequest;
-import br.com.wg.starwars.model.response.PlanetResponse;
 import br.com.wg.starwars.service.PlanetService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,28 +22,28 @@ public class PlanetControllerImpl implements PlanetController {
     private final PlanetMapper mapper;
 
     @Override
-    public ResponseEntity<Mono<PlanetResponse>> save(final PlanetRequest request) {
+    public ResponseEntity<Mono<PlanetDTO>> save(final PlanetRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 service.save(request).map(mapper::entityToResponse)
         );
     }
 
     @Override
-    public ResponseEntity<Mono<PlanetResponse>> findById(String id) {
+    public ResponseEntity<Mono<PlanetDTO>> findById(String id) {
         return ResponseEntity.ok().body(
                 service.findById(id).map(mapper::entityToResponse)
         );
     }
 
     @Override
-    public ResponseEntity<Flux<PlanetResponse>> findByName(String name) {
+    public ResponseEntity<Flux<PlanetDTO>> findByName(String name) {
         return ResponseEntity.ok().body(
                 service.findByName(name).map(mapper::entityToResponse)
         );
     }
 
     @Override
-    public ResponseEntity<Flux<PlanetResponse>> findAll() {
+    public ResponseEntity<Flux<PlanetDTO>> findAll() {
         return ResponseEntity.ok().body(
                 service.findAll().map(mapper::entityToResponse)
         );
