@@ -20,6 +20,7 @@ public class Film implements Serializable {
 	
 	@Id
 	private String id;
+	private String url;
 	private String title;
 	private String opening_crawl;
 }

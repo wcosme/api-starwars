@@ -20,7 +20,7 @@ public interface PlanetMapper {
     Planet requestToEntity(final PlanetRequest request);
 
     @Mapping(target = "id", ignore = true)
-    Planet responseToEntity(final PlanetDTO planet);
+    Planet dtoToEntity(final PlanetDTO planet);
 
-    PlanetDTO entityToResponse(final Planet entity);
+    PlanetDTO entityToDto(final Planet entity);
 }

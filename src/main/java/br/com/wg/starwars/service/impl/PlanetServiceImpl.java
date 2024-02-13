@@ -2,25 +2,22 @@ package br.com.wg.starwars.service.impl;
 
 import br.com.wg.starwars.client.SwapiClient;
 import br.com.wg.starwars.mapper.PlanetMapper;
-import br.com.wg.starwars.model.document.Film;
 import br.com.wg.starwars.model.document.Planet;
-import br.com.wg.starwars.model.dto.FilmsDTO;
-import br.com.wg.starwars.model.dto.PlanetDTO;
 import br.com.wg.starwars.model.request.PlanetRequest;
 import br.com.wg.starwars.repository.PlanetRepository;
 import br.com.wg.starwars.service.PlanetService;
 import br.com.wg.starwars.service.exception.ObjectNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.UUID;
 
 import static java.lang.String.format;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class PlanetServiceImpl implements PlanetService {
 
     private final PlanetRepository planetRepository;
@@ -35,11 +32,54 @@ public class PlanetServiceImpl implements PlanetService {
     @Override
     public Mono<Planet> findById(String id) {
 
+        /*return planetRepository.findById(id)
+                .switchIfEmpty(fetchPlanetFromExternalApi(id))
+                .onErrorResume(throwable -> handleNotFound(Mono.empty(), id));*/
+
         return planetRepository.findById(id)
                 .switchIfEmpty(swapiClient.findById(id)
-                        .flatMap(planetResponse -> planetRepository.save(planetMapper.responseToEntity(planetResponse))
+                        .flatMap(planetDTO -> planetRepository.save(planetMapper.dtoToEntity(planetDTO))
                                 .switchIfEmpty(handleNotFound(Mono.empty(), id))));
     }
+
+    /*private Mono<Planet> fetchPlanetFromExternalApi(String id) {
+
+        log.info("Buscando o planeta de id: [{}]", id);
+
+        return swapiClient.findById(id)
+                .flatMap(planetResponse -> {
+                    //Planet planet = planetMapper.responseToEntity(planetResponse);
+                    return fetchFilmsForPlanet(planetResponse); // Chama o método para buscar os filmes do planeta
+                })
+                .switchIfEmpty(handleNotFound(Mono.empty(), id));
+    }*/
+
+
+    /*private Mono<Planet> fetchFilmsForPlanet(PlanetDTO planetDTO) {
+        List<Mono<Film>> filmMonos = new ArrayList<>();
+        for (String filmUrl : planetDTO.getFilms()) {
+            log.info("Buscando o filme de url: [{}]", filmUrl);
+            filmMonos.add(swapiClient.fetchFilmByUrl(filmUrl));
+        }
+        return Mono.zip(filmMonos, films -> {
+            Planet planet = planetMapper.dtoToEntity(planetDTO);
+            for (Object film : films) {
+                planet.addFilm((Film) film);
+            }
+            return planet;
+        });
+    }*/
+
+    /*private Mono<Planet> fetchFilmsForPlanet(PlanetDTO planetDTO) {
+        List<Film> films = planetMapper.mapFilms(planetDTO.getFilms());
+        Planet planet = planetMapper.dtoToEntity(planetDTO);
+        planet.setFilms(films);
+        return Mono.just(planet);
+    }*/
+
+
+
+
 
     @Override
     public Flux<Planet> findByName(String name) {
@@ -68,7 +108,7 @@ public class PlanetServiceImpl implements PlanetService {
         ));
     }
 
-    private Flux<Planet> getPlanet(PlanetDTO dto) {
+    /*private Flux<Planet> getPlanet(PlanetDTO dto) {
         var planetFlux = Flux.just(dto);
 
         var filmsFlux = Flux.fromIterable(dto.getFilms())
@@ -84,5 +124,5 @@ public class PlanetServiceImpl implements PlanetService {
         });
 
         return result;
-    }
+    }*/
 }

@@ -1,5 +1,6 @@
 package br.com.wg.starwars.client;
 
+import br.com.wg.starwars.model.document.Film;
 import br.com.wg.starwars.model.dto.PlanetDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,13 @@ public class SwapiClient {
 				.retrieve()
 				.bodyToMono(tipo)
 				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
+	}
+
+	public Mono<Film> fetchFilmByUrl(String filmUrl) {
+		return swapiClient.get()
+				.uri(filmUrl)
+				.retrieve()
+				.bodyToMono(Film.class);
 	}
 
 
