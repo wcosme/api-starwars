@@ -35,61 +35,12 @@ public class PlanetServiceImpl implements PlanetService {
 
     @Override
     public Mono<Planet> findById(String id) {
-
         return planetRepository.findById(id)
                 .switchIfEmpty(fetchPlanetFromExternalApi(id))
                 .onErrorResume(throwable -> handleNotFound(Mono.empty(), id));
 
 
     }
-
-    private Mono<Planet> fetchPlanetFromExternalApi(String id) {
-        return swapiClient.findById(id)
-                .flatMap(dto -> {
-                    Planet planet = planetMapper.dtoToEntity(dto);
-                    log.info("Planeta encontrado: {}", planet);
-                    return fetchFilmsForPlanet(planet).switchIfEmpty(Mono.error(new RuntimeException("Erro ao buscar filmes para o planeta.")))
-                            .thenReturn(planet); // Chama o método para buscar os filmes do planeta
-                })
-                .switchIfEmpty(handleNotFound(Mono.empty(), id));
-    }
-
-
-    private Mono<Planet> fetchFilmsForPlanet(Planet planet) {
-        List<Mono<Film>> filmMonos = new ArrayList<>();
-        if (planet.getFilmes() == null) {
-            planet.setFilmes(new ArrayList<>());
-        }
-        for (String filmUrl : planet.getFilms()) {
-            filmMonos.add(swapiClient.fetchFilmByUrl(filmUrl)
-                    .doOnSuccess(film -> {
-                        if (film != null) {
-                            //planet.addFilm(film); // Adiciona o filme à lista de filmes do planeta
-                            log.info("Filme {} adicionado ao planeta {}", film, planet);
-                        } else {
-                            log.error("Erro ao buscar filme para a URL: {}", filmUrl);
-                        }
-                    })
-                    .doOnError(error -> log.error("Erro ao buscar filme para a URL: {}", filmUrl, error)));
-        }
-        return Mono.zip(filmMonos, films -> {
-            for (Object film : films) {
-                planet.addFilm((Film) film);
-            }
-            return planet;
-        }).flatMap(updatedPlanet -> {
-            return planetRepository.save(updatedPlanet)
-                    .doOnSuccess(savedPlanet -> {
-                        // Log de sucesso após salvar o planeta
-                        log.info("Planeta salvo com sucesso: {}", savedPlanet);
-                    })
-                    .doOnError(error -> {
-                        // Log de erro em caso de falha ao salvar o planeta
-                        log.error("Erro ao salvar planeta: {}", error.getMessage());
-                    });
-        });
-    }
-
 
     @Override
     public Flux<Planet> findByName(String name) {
@@ -108,6 +59,53 @@ public class PlanetServiceImpl implements PlanetService {
         return handleNotFound(planetRepository.findById(id), id)
                 .flatMap(planetRepository::delete)
                 .then();
+    }
+
+    private Mono<Planet> fetchPlanetFromExternalApi(String id) {
+        return swapiClient.findById(id)
+                .flatMap(dto -> {
+                    Planet planet = planetMapper.dtoToEntity(dto);
+                    log.info("Planeta encontrado: {}", planet);
+                    return fetchFilmsForPlanet(planet)
+                            .switchIfEmpty(Mono.error(new RuntimeException("Erro ao buscar filmes para o planeta.")))
+                            .thenReturn(planet); // Chama o método para buscar os filmes do planeta
+                })
+                .switchIfEmpty(handleNotFound(Mono.empty(), id));
+    }
+
+    private Mono<Planet> fetchFilmsForPlanet(Planet planet) {
+        List<Mono<Film>> filmMonos = new ArrayList<>();
+        if (planet.getFilmes() == null) {
+            planet.setFilmes(new ArrayList<>());
+        }
+        for (String filmUrl : planet.getFilms()) {
+            filmMonos.add(swapiClient.fetchFilmByUrl(filmUrl)
+                    .doOnSuccess(film -> {
+                        if (film != null) {
+                            planet.addFilm(film); // Adiciona o filme à lista de filmes do planeta
+                            log.info("Filme {} adicionado ao planeta {}", film, planet);
+                        } else {
+                            log.error("Erro ao buscar filme para a URL: {}", filmUrl);
+                        }
+                    })
+                    .doOnError(error -> log.error("Erro ao buscar filme para a URL: {}", filmUrl, error)));
+        }
+        return Mono.zip(filmMonos, films -> {
+            /*for (Object film : films) {
+                planet.addFilm((Film) film);
+            }*/
+            return planet;
+        }).flatMap(updatedPlanet -> {
+            return planetRepository.save(updatedPlanet)
+                    .doOnSuccess(savedPlanet -> {
+                        // Log de sucesso após salvar o planeta
+                        log.info("Planeta salvo com sucesso: {}", savedPlanet);
+                    })
+                    .doOnError(error -> {
+                        // Log de erro em caso de falha ao salvar o planeta
+                        log.error("Erro ao salvar planeta: {}", error.getMessage());
+                    });
+        });
     }
 
     private <T> Mono<T> handleNotFound(Mono<T> mono, String id) {
