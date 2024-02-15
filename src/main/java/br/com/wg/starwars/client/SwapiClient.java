@@ -1,5 +1,6 @@
 package br.com.wg.starwars.client;
 
+import br.com.wg.starwars.model.document.Character;
 import br.com.wg.starwars.model.document.Film;
 import br.com.wg.starwars.model.dto.PlanetDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,9 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -61,7 +65,27 @@ public class SwapiClient {
 				.accept(APPLICATION_JSON)
 				.retrieve()
 				.bodyToMono(Film.class)
+				.flatMap(this::fetchCharactersForFilm)
 				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
 	}
 
+
+	private Mono<Film> fetchCharactersForFilm(Film film) {
+		List<Mono<Character>> characterMonos = film.getCharacters().stream()
+				.map(characterUrl -> WebClient.create()
+						.get()
+						.uri(characterUrl)
+						.retrieve()
+						.bodyToMono(Character.class))
+				.collect(Collectors.toList());
+
+		return Mono.zip(characterMonos, characters -> {
+			List<Character> characterList = Arrays.asList(characters)
+					.stream()
+					.map(character -> (Character) character)
+					.collect(Collectors.toList());
+			film.setCharacter(characterList);
+			return film;
+		});
+	}
 }

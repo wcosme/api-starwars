@@ -16,20 +16,15 @@ import static org.mapstruct.NullValuePropertyMappingStrategy.IGNORE;
 )
 public interface PlanetMapper {
 
-    @Mappings({
-            //@Mapping(target = "filmes", ignore = true),
-            //@Mapping(target = "filmAppearances", ignore = true)
-            //@Mapping(target = "actions", source = "childSource")
-    })
+
     Planet requestToEntity(final PlanetRequest request);
 
     //@Mapping(target = "filmes", ignore = true)
     Planet dtoToEntity(final PlanetDTO planet);
 
     @Mappings({
-            //@Mapping(target = "films", ignore = true)
-            //@Mapping(target = "id", ignore = true),
-            //@Mapping(target = "actions", source = "childSource")
+            //@Mapping(target = "films", ignore = true),
+            //@Mapping(target = "id", ignore = true)
     })
     PlanetDTO entityToDto(final Planet entity);
 

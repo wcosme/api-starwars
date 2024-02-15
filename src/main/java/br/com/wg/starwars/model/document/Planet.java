@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-//@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection="planets")
