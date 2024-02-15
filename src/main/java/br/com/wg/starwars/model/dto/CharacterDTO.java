@@ -9,10 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FilmsDTO{
+public class CharacterDTO {
 
-	private String title;
-	private String director;
-	private String opening_crawl;
-	//private List<String> characters;
+    private String name;
+
 }
