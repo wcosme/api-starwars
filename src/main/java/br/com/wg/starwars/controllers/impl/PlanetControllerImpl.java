@@ -24,28 +24,28 @@ public class PlanetControllerImpl implements PlanetController {
     @Override
     public ResponseEntity<Mono<PlanetDTO>> save(final PlanetRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                service.save(request).map(mapper::entityToResponse)
+                service.save(request).map(mapper::entityToDto)
         );
     }
 
     @Override
     public ResponseEntity<Mono<PlanetDTO>> findById(String id) {
         return ResponseEntity.ok().body(
-                service.findById(id).map(mapper::entityToResponse)
+                service.findById(id).map(mapper::entityToDto)
         );
     }
 
     @Override
     public ResponseEntity<Flux<PlanetDTO>> findByName(String name) {
         return ResponseEntity.ok().body(
-                service.findByName(name).map(mapper::entityToResponse)
+                service.findByName(name).map(mapper::entityToDto)
         );
     }
 
     @Override
     public ResponseEntity<Flux<PlanetDTO>> findAll() {
         return ResponseEntity.ok().body(
-                service.findAll().map(mapper::entityToResponse)
+                service.findAll().map(mapper::entityToDto)
         );
     }
 

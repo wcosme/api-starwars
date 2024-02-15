@@ -4,23 +4,24 @@ import br.com.wg.starwars.client.SwapiClient;
 import br.com.wg.starwars.mapper.PlanetMapper;
 import br.com.wg.starwars.model.document.Film;
 import br.com.wg.starwars.model.document.Planet;
-import br.com.wg.starwars.model.dto.FilmsDTO;
-import br.com.wg.starwars.model.dto.PlanetDTO;
 import br.com.wg.starwars.model.request.PlanetRequest;
 import br.com.wg.starwars.repository.PlanetRepository;
 import br.com.wg.starwars.service.PlanetService;
 import br.com.wg.starwars.service.exception.ObjectNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.String.format;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class PlanetServiceImpl implements PlanetService {
 
     private final PlanetRepository planetRepository;
@@ -34,11 +35,11 @@ public class PlanetServiceImpl implements PlanetService {
 
     @Override
     public Mono<Planet> findById(String id) {
-
         return planetRepository.findById(id)
-                .switchIfEmpty(swapiClient.findById(id)
-                        .flatMap(planetResponse -> planetRepository.save(planetMapper.responseToEntity(planetResponse))
-                                .switchIfEmpty(handleNotFound(Mono.empty(), id))));
+                .switchIfEmpty(fetchPlanetFromExternalApi(id))
+                .onErrorResume(throwable -> handleNotFound(Mono.empty(), id));
+
+
     }
 
     @Override
@@ -60,29 +61,58 @@ public class PlanetServiceImpl implements PlanetService {
                 .then();
     }
 
+    private Mono<Planet> fetchPlanetFromExternalApi(String id) {
+        return swapiClient.findById(id)
+                .flatMap(dto -> {
+                    Planet planet = planetMapper.dtoToEntity(dto);
+                    log.info("Planeta encontrado: {}", planet);
+                    return fetchFilmsForPlanet(planet)
+                            .switchIfEmpty(Mono.error(new RuntimeException("Erro ao buscar filmes para o planeta.")))
+                            .thenReturn(planet); // Chama o método para buscar os filmes do planeta
+                })
+                .switchIfEmpty(handleNotFound(Mono.empty(), id));
+    }
+
+    private Mono<Planet> fetchFilmsForPlanet(Planet planet) {
+        List<Mono<Film>> filmMonos = new ArrayList<>();
+        if (planet.getFilmes() == null) {
+            planet.setFilmes(new ArrayList<>());
+        }
+        for (String filmUrl : planet.getFilms()) {
+            filmMonos.add(swapiClient.fetchFilmByUrl(filmUrl)
+                    .doOnSuccess(film -> {
+                        if (film != null) {
+                            planet.addFilm(film); // Adiciona o filme à lista de filmes do planeta
+                            log.info("Filme {} adicionado ao planeta {}", film, planet);
+                        } else {
+                            log.error("Erro ao buscar filme para a URL: {}", filmUrl);
+                        }
+                    })
+                    .doOnError(error -> log.error("Erro ao buscar filme para a URL: {}", filmUrl, error)));
+        }
+        return Mono.zip(filmMonos, films -> {
+            /*for (Object film : films) {
+                planet.addFilm((Film) film);
+            }*/
+            return planet;
+        }).flatMap(updatedPlanet -> {
+            return planetRepository.save(updatedPlanet)
+                    .doOnSuccess(savedPlanet -> {
+                        // Log de sucesso após salvar o planeta
+                        log.info("Planeta salvo com sucesso: {}", savedPlanet);
+                    })
+                    .doOnError(error -> {
+                        // Log de erro em caso de falha ao salvar o planeta
+                        log.error("Erro ao salvar planeta: {}", error.getMessage());
+                    });
+        });
+    }
+
     private <T> Mono<T> handleNotFound(Mono<T> mono, String id) {
         return mono.switchIfEmpty(Mono.error(
                 new ObjectNotFoundException(
                         format("Object not found. Id: %s, Type: %s", id, Planet.class.getSimpleName())
                 )
         ));
-    }
-
-    private Flux<Planet> getPlanet(PlanetDTO dto) {
-        var planetFlux = Flux.just(dto);
-
-        var filmsFlux = Flux.fromIterable(dto.getFilms())
-                .flatMap(url -> swapiClient.findByUrl(url, FilmsDTO.class))
-                .map(filmsDTO -> new Film(
-                        filmsDTO.getUrl(),
-                        filmsDTO.getTitle(),
-                        filmsDTO.getOpening_crawl()))
-                .collectList();
-
-        var result = planetFlux.zipWith(filmsFlux, (planet, films) -> {
-            return new Planet(UUID.randomUUID().toString(), planet.getName(), planet.getClimate(), planet.getTerrain(), planet.getFilmAppearances(), planet.getFilms());
-        });
-
-        return result;
     }
 }
