@@ -23,7 +23,6 @@ public class SwapiClient {
     }
 
 	public Mono<PlanetDTO> findById(String id) {
-		log.info("Buscando o planeta de id: [{}]", id);
 		return swapiClient
 				.get()
 				.uri("planets/" + id)
@@ -34,7 +33,7 @@ public class SwapiClient {
 	}
 
 	public Mono<PlanetDTO> findByName(String name) {
-		log.info("Buscando o planeta de name: [{}]", name);
+		log.info("Buscando o planeta de name: [{}] findByName", name);
 		return swapiClient
 				.get()
 				.uri("planets/" + name)
@@ -45,7 +44,7 @@ public class SwapiClient {
 	}
 
 	public <T> Mono<T> findByUrl(String url, Class<T> tipo) {
-		log.info("Buscando o planeta de id: [{}]", url);
+		log.info("Buscando o filme de id: [{}] pelo findByUrl", url);
 		return swapiClient
 				.get()
 				.uri(url)
@@ -56,11 +55,13 @@ public class SwapiClient {
 	}
 
 	public Mono<Film> fetchFilmByUrl(String filmUrl) {
-		return swapiClient.get()
+		return swapiClient
+				.get()
 				.uri(filmUrl)
+				.accept(APPLICATION_JSON)
 				.retrieve()
-				.bodyToMono(Film.class);
+				.bodyToMono(Film.class)
+				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
 	}
-
 
 }

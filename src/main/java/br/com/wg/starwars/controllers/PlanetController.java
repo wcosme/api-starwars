@@ -13,7 +13,7 @@ public interface PlanetController {
     @PostMapping
     ResponseEntity<Mono<PlanetDTO>> save(@Valid @RequestBody PlanetRequest request);
 
-    @GetMapping(value = "/id/{id}")
+    @GetMapping(value = "{id}")
     ResponseEntity<Mono<PlanetDTO>> findById(@PathVariable String id);
 
     @GetMapping(value = "/planetName/{name}")
@@ -22,6 +22,6 @@ public interface PlanetController {
     @GetMapping
     ResponseEntity<Flux<PlanetDTO>> findAll();
 
-    @DeleteMapping(value = "/id/{id}")
+    @DeleteMapping(value = "{id}")
     ResponseEntity<Mono<Void>> delete(@PathVariable String id);
 }

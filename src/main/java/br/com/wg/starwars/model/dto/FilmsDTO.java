@@ -6,18 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Serializable;
-import java.util.UUID;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FilmsDTO implements Serializable{
+public class FilmsDTO{
 
-	private UUID id;
-	private String url;
 	private String title;
+	private String director;
 	private String opening_crawl;
 }

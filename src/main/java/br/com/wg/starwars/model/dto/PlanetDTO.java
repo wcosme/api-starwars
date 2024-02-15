@@ -1,9 +1,11 @@
 package br.com.wg.starwars.model.dto;
 
+import br.com.wg.starwars.model.document.Film;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -16,6 +18,15 @@ public class PlanetDTO {
     private String terrain;
     private Long filmAppearances;
     private List<String> films;
+    private List<Film> filmes = new ArrayList<>();
+
+    public List<Film> getFilmes() {
+        return filmes;
+    }
+
+    public void setFilmes(List<Film> filmes) {
+        this.filmes = filmes;
+    }
 
     public String getId() {
         return id;
@@ -50,7 +61,10 @@ public class PlanetDTO {
     }
 
     public Long getFilmAppearances() {
-        return this.filmAppearances = (long) this.getFilms().size();
+        if(this.getFilms() != null){
+            return this.filmAppearances = (long) this.getFilms().size();
+        }
+        return this.filmAppearances = 0L;
     }
 
     public void setFilmAppearances(Long filmAppearances) {
