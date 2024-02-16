@@ -62,35 +62,15 @@ public class SwapiClient {
 				.accept(APPLICATION_JSON)
 				.retrieve()
 				.bodyToMono(Film.class)
-				//.flatMap(this::fetchCharactersForFilm)
 				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
 	}
-
-
-	/*private Mono<Film> fetchCharactersForFilm(Film film) {
-		List<Mono<Character>> characterMonos = film.getCharacters().stream()
-				.map(characterUrl -> WebClient.create()
-						.get()
-						.uri(characterUrl)
-						.retrieve()
-						.bodyToMono(Character.class))
-				.collect(Collectors.toList());
-
-		return Mono.zip(characterMonos, characters -> {
-			List<Character> characterList = Arrays.asList(characters)
-					.stream()
-					.map(character -> (Character) character)
-					.collect(Collectors.toList());
-			film.setCharacter(characterList);
-			return film;
-		});
-	}*/
 
 	public Mono<Character> fetchCharacterByUrl(String characterUrl) {
 		return swapiClient
 				.get()
 				.uri(characterUrl)
 				.retrieve()
-				.bodyToMono(Character.class);
+				.bodyToMono(Character.class)
+				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
 	}
 }
