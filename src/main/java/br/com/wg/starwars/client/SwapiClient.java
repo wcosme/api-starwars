@@ -10,9 +10,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
@@ -65,12 +62,12 @@ public class SwapiClient {
 				.accept(APPLICATION_JSON)
 				.retrieve()
 				.bodyToMono(Film.class)
-				.flatMap(this::fetchCharactersForFilm)
+				//.flatMap(this::fetchCharactersForFilm)
 				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
 	}
 
 
-	private Mono<Film> fetchCharactersForFilm(Film film) {
+	/*private Mono<Film> fetchCharactersForFilm(Film film) {
 		List<Mono<Character>> characterMonos = film.getCharacters().stream()
 				.map(characterUrl -> WebClient.create()
 						.get()
@@ -87,5 +84,13 @@ public class SwapiClient {
 			film.setCharacter(characterList);
 			return film;
 		});
+	}*/
+
+	public Mono<Character> fetchCharacterByUrl(String characterUrl) {
+		return swapiClient
+				.get()
+				.uri(characterUrl)
+				.retrieve()
+				.bodyToMono(Character.class);
 	}
 }
