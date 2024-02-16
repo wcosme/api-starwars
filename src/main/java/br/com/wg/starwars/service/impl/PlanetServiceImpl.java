@@ -75,27 +75,29 @@ public class PlanetServiceImpl implements PlanetService {
                 .switchIfEmpty(handleNotFound(Mono.empty(), id));
     }
 
-
     private Mono<Planet> fetchFilmsAndCharactersForPlanet(Planet planet) {
-        List<Mono<Film>> filmMonos = new ArrayList<>();
         if (planet.getFilms() == null) {
             planet.setFilms(new ArrayList<>());
         }
-        for (String filmUrl : planet.getFilms()) {
-            filmMonos.add(swapiClient.fetchFilmByUrl(filmUrl)
-                    .flatMap(film -> fetchCharactersForFilm(film) // Chamada para buscar os personagens de cada filme
-                            .thenReturn(film))
-                    .doOnSuccess(film -> {
-                        planet.addFilm(film); // Adiciona o filme à lista de filmes do planeta
-                        log.info("Filme {} adicionado ao planeta {}", film, planet);
-                    })
-                    .doOnError(error -> log.error("Erro ao buscar filme para a URL: {}", filmUrl, error)));
-        }
-        return Mono.zip(filmMonos, films -> planet)
+
+        // Criar um Flux de chamadas assíncronas para buscar os filmes
+        Flux<Film> filmsFlux = Flux.fromIterable(planet.getFilms())
+                .flatMap(swapiClient::fetchFilmByUrl)
+                .flatMap(film -> fetchCharactersForFilm(film) // Chamada para buscar os personagens de cada filme
+                        .thenReturn(film));
+
+        // Coletar os resultados em uma lista
+        return filmsFlux.collectList()
+                .map(films -> {
+                    planet.setFilmes(films);
+                    return planet;
+                })
                 .flatMap(updatedPlanet -> planetRepository.save(updatedPlanet)
                         .doOnSuccess(savedPlanet -> log.info("Planeta salvo com sucesso: {}", savedPlanet))
                         .doOnError(error -> log.error("Erro ao salvar planeta: {}", error.getMessage())));
     }
+
+
 
     private Mono<Film> fetchCharactersForFilm(Film film) {
         List<Mono<Character>> characterMonos = film.getCharacters().stream()
