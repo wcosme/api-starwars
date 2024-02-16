@@ -2,7 +2,6 @@ package br.com.wg.starwars.service.impl;
 
 import br.com.wg.starwars.client.SwapiClient;
 import br.com.wg.starwars.mapper.PlanetMapper;
-import br.com.wg.starwars.model.document.Character;
 import br.com.wg.starwars.model.document.Film;
 import br.com.wg.starwars.model.document.Planet;
 import br.com.wg.starwars.model.request.PlanetRequest;
@@ -16,8 +15,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -83,8 +80,8 @@ public class PlanetServiceImpl implements PlanetService {
         // Criar um Flux de chamadas assíncronas para buscar os filmes
         Flux<Film> filmsFlux = Flux.fromIterable(planet.getFilms())
                 .flatMap(swapiClient::fetchFilmByUrl)
-                .flatMap(film -> fetchCharactersForFilm(film) // Chamada para buscar os personagens de cada filme
-                        .thenReturn(film));
+                .flatMap(film -> fetchCharactersForFilm(film)
+                        .thenReturn(film)); // Chamada para buscar os personagens de cada filme
 
         // Coletar os resultados em uma lista
         return filmsFlux.collectList()
@@ -97,17 +94,13 @@ public class PlanetServiceImpl implements PlanetService {
                         .doOnError(error -> log.error("Erro ao salvar planeta: {}", error.getMessage())));
     }
 
-
-
     private Mono<Film> fetchCharactersForFilm(Film film) {
-        List<Mono<Character>> characterMonos = film.getCharacters().stream()
-                .map(swapiClient::fetchCharacterByUrl) // Chamada para buscar os personagens de um filme
-                .collect(Collectors.toList());
-
-        return Flux.concat(characterMonos)
+        // Buscar os personagens associados ao filme
+        return Flux.fromIterable(film.getCharacters())
+                .flatMap(swapiClient::fetchCharacterByUrl)
                 .collectList()
                 .map(characters -> {
-                    film.setCharacter(characters); // Define os personagens no filme
+                    film.setCharacter(characters); // Definir os personagens no filme
                     return film;
                 });
     }
