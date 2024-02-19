@@ -15,7 +15,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static java.lang.String.format;
 
@@ -66,46 +65,44 @@ public class PlanetServiceImpl implements PlanetService {
                 .flatMap(dto -> {
                     Planet planet = planetMapper.dtoToEntity(dto);
                     log.info("Planeta encontrado: {}", planet);
-                    return fetchFilmsForPlanet(planet)
+                    return fetchFilmsAndCharactersForPlanet(planet)
                             .switchIfEmpty(Mono.error(new RuntimeException("Erro ao buscar filmes para o planeta.")))
                             .thenReturn(planet); // Chama o método para buscar os filmes do planeta
                 })
                 .switchIfEmpty(handleNotFound(Mono.empty(), id));
     }
 
-    private Mono<Planet> fetchFilmsForPlanet(Planet planet) {
-        List<Mono<Film>> filmMonos = new ArrayList<>();
-        if (planet.getFilmes() == null) {
-            planet.setFilmes(new ArrayList<>());
+    private Mono<Planet> fetchFilmsAndCharactersForPlanet(Planet planet) {
+        if (planet.getFilms() == null) {
+            planet.setFilms(new ArrayList<>());
         }
-        for (String filmUrl : planet.getFilms()) {
-            filmMonos.add(swapiClient.fetchFilmByUrl(filmUrl)
-                    .doOnSuccess(film -> {
-                        if (film != null) {
-                            planet.addFilm(film); // Adiciona o filme à lista de filmes do planeta
-                            log.info("Filme {} adicionado ao planeta {}", film, planet);
-                        } else {
-                            log.error("Erro ao buscar filme para a URL: {}", filmUrl);
-                        }
-                    })
-                    .doOnError(error -> log.error("Erro ao buscar filme para a URL: {}", filmUrl, error)));
-        }
-        return Mono.zip(filmMonos, films -> {
-            /*for (Object film : films) {
-                planet.addFilm((Film) film);
-            }*/
-            return planet;
-        }).flatMap(updatedPlanet -> {
-            return planetRepository.save(updatedPlanet)
-                    .doOnSuccess(savedPlanet -> {
-                        // Log de sucesso após salvar o planeta
-                        log.info("Planeta salvo com sucesso: {}", savedPlanet);
-                    })
-                    .doOnError(error -> {
-                        // Log de erro em caso de falha ao salvar o planeta
-                        log.error("Erro ao salvar planeta: {}", error.getMessage());
-                    });
-        });
+
+        // Criar um Flux de chamadas assíncronas para buscar os filmes
+        Flux<Film> filmsFlux = Flux.fromIterable(planet.getFilms())
+                .flatMap(swapiClient::fetchFilmByUrl)
+                .flatMap(film -> fetchCharactersForFilm(film)
+                        .thenReturn(film)); // Chamada para buscar os personagens de cada filme
+
+        // Coletar os resultados em uma lista
+        return filmsFlux.collectList()
+                .map(films -> {
+                    planet.setFilmes(films);
+                    return planet;
+                })
+                .flatMap(updatedPlanet -> planetRepository.save(updatedPlanet)
+                        .doOnSuccess(savedPlanet -> log.info("Planeta salvo com sucesso: {}", savedPlanet))
+                        .doOnError(error -> log.error("Erro ao salvar planeta: {}", error.getMessage())));
+    }
+
+    private Mono<Film> fetchCharactersForFilm(Film film) {
+        // Buscar os personagens associados ao filme
+        return Flux.fromIterable(film.getCharacters())
+                .flatMap(swapiClient::fetchCharacterByUrl)
+                .collectList()
+                .map(characters -> {
+                    film.setCharacter(characters); // Definir os personagens no filme
+                    return film;
+                });
     }
 
     private <T> Mono<T> handleNotFound(Mono<T> mono, String id) {
