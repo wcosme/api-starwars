@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.ArrayList;
 
@@ -79,25 +80,41 @@ public class PlanetServiceImpl implements PlanetService {
 
         // Criar um Flux de chamadas assíncronas para buscar os filmes
         Flux<Film> filmsFlux = Flux.fromIterable(planet.getFilms())
+                .parallel() // Converte para ParallelFlux
+                .runOn(Schedulers.parallel()) // Executa em threads paralelas
                 .flatMap(swapiClient::fetchFilmByUrl)
-                .flatMap(film -> fetchCharactersForFilm(film)
-                        .thenReturn(film)); // Chamada para buscar os personagens de cada filme
+                .flatMap(film -> fetchCharactersForFilm(film).thenReturn(film))
+                .sequential(); // Converte de volta para Flux sequencial; // Chamada para buscar os personagens de cada filme
 
         // Coletar os resultados em uma lista
-        return filmsFlux.collectList()
+        /*return filmsFlux.collectList()
                 .map(films -> {
                     planet.setFilmes(films);
                     return planet;
                 })
                 .flatMap(updatedPlanet -> planetRepository.save(updatedPlanet)
                         .doOnSuccess(savedPlanet -> log.info("Planeta salvo com sucesso: {}", savedPlanet))
-                        .doOnError(error -> log.error("Erro ao salvar planeta: {}", error.getMessage())));
+                        .doOnError(error -> log.error("Erro ao salvar planeta: {}", error.getMessage())));*/
+
+        // Coletar os resultados em uma lista
+        return filmsFlux.collectList()
+                .flatMap(films -> {
+                    planet.setFilmes(films);
+                    return planetRepository.save(planet)
+                            .doOnSuccess(savedPlanet -> log.info("Planeta salvo com sucesso: {}", savedPlanet))
+                            .doOnError(error -> log.error("Erro ao salvar planeta: {}", error.getMessage()));
+                });
+
+
     }
 
     private Mono<Film> fetchCharactersForFilm(Film film) {
         // Buscar os personagens associados ao filme
         return Flux.fromIterable(film.getCharacters())
+                .parallel() // Converte para ParallelFlux
+                .runOn(Schedulers.parallel()) // Executa em threads paralelas
                 .flatMap(swapiClient::fetchCharacterByUrl)
+                .sequential() // Converte de volta para Flux sequencial
                 .collectList()
                 .map(characters -> {
                     film.setCharacter(characters); // Definir os personagens no filme
