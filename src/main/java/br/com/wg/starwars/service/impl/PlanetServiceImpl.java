@@ -83,18 +83,9 @@ public class PlanetServiceImpl implements PlanetService {
                 .parallel() // Converte para ParallelFlux
                 .runOn(Schedulers.parallel()) // Executa em threads paralelas
                 .flatMap(swapiClient::fetchFilmByUrl)
-                .flatMap(film -> fetchCharactersForFilm(film).thenReturn(film))
-                .sequential(); // Converte de volta para Flux sequencial; // Chamada para buscar os personagens de cada filme
+                .flatMap(film -> fetchCharactersForFilm(film).thenReturn(film)) // Chamada para buscar os personagens de cada filme
+                .sequential(); // Converte de volta para Flux sequencial;
 
-        // Coletar os resultados em uma lista
-        /*return filmsFlux.collectList()
-                .map(films -> {
-                    planet.setFilmes(films);
-                    return planet;
-                })
-                .flatMap(updatedPlanet -> planetRepository.save(updatedPlanet)
-                        .doOnSuccess(savedPlanet -> log.info("Planeta salvo com sucesso: {}", savedPlanet))
-                        .doOnError(error -> log.error("Erro ao salvar planeta: {}", error.getMessage())));*/
 
         // Coletar os resultados em uma lista
         return filmsFlux.collectList()
