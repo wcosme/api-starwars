@@ -108,7 +108,7 @@ public class PlanetServiceImpl implements PlanetService {
                 .sequential() // Converte de volta para Flux sequencial
                 .collectList()
                 .map(characters -> {
-                    film.setCharacter(characters); // Definir os personagens no filme
+                    film.setCharacter(characters);
                     return film;
                 });
     }
