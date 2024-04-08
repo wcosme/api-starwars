@@ -1,5 +1,7 @@
 package br.com.wg.starwars.client;
 
+import br.com.wg.starwars.model.document.Character;
+import br.com.wg.starwars.model.document.Film;
 import br.com.wg.starwars.model.dto.PlanetDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +24,6 @@ public class SwapiClient {
     }
 
 	public Mono<PlanetDTO> findById(String id) {
-		log.info("Buscando o planeta de id: [{}]", id);
 		return swapiClient
 				.get()
 				.uri("planets/" + id)
@@ -33,7 +34,7 @@ public class SwapiClient {
 	}
 
 	public Mono<PlanetDTO> findByName(String name) {
-		log.info("Buscando o planeta de name: [{}]", name);
+		log.info("Buscando o planeta de name: [{}] findByName", name);
 		return swapiClient
 				.get()
 				.uri("planets/" + name)
@@ -44,7 +45,7 @@ public class SwapiClient {
 	}
 
 	public <T> Mono<T> findByUrl(String url, Class<T> tipo) {
-		log.info("Buscando o planeta de id: [{}]", url);
+		log.info("Buscando o filme de id: [{}] pelo findByUrl", url);
 		return swapiClient
 				.get()
 				.uri(url)
@@ -54,5 +55,22 @@ public class SwapiClient {
 				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
 	}
 
+	public Mono<Film> fetchFilmByUrl(String filmUrl) {
+		return swapiClient
+				.get()
+				.uri(filmUrl)
+				.accept(APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(Film.class)
+				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
+	}
 
+	public Mono<Character> fetchCharacterByUrl(String characterUrl) {
+		return swapiClient
+				.get()
+				.uri(characterUrl)
+				.retrieve()
+				.bodyToMono(Character.class)
+				.retryWhen(Retry.fixedDelay(3, Duration.ofMillis(1000)));
+	}
 }
